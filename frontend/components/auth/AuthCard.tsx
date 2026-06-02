@@ -116,21 +116,6 @@ export default function AuthCard({ initialMode = 'login' }: AuthCardProps) {
           <span aria-hidden="true">-&gt;</span>
         </button>
 
-        <div className="flex items-center gap-4 py-2">
-          <span className="h-px flex-1 bg-ink/9" />
-          <span className="text-[0.67rem] font-black uppercase tracking-[0.14em] text-ink/32">or continue with</span>
-          <span className="h-px flex-1 bg-ink/9" />
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <button className="h-12 rounded-lg border border-ink/8 bg-white/65 text-lg font-black shadow-sm transition hover:border-cyan/50" type="button">
-            <span className="text-[#4285f4]">G</span>
-          </button>
-          <button className="h-12 rounded-lg border border-ink/8 bg-white/65 text-lg font-black shadow-sm transition hover:border-cyan/50" type="button">
-            GH
-          </button>
-        </div>
-
         <p className="min-h-5 text-center text-xs font-bold text-ink/48" role="status">
           {status}
         </p>

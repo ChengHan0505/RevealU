@@ -12,9 +12,10 @@ const navItems = [
 type MainNavbarProps = {
   authLabel?: 'Login' | 'Logout' | 'Register';
   authHref?: string;
+  showNavLinks?: boolean;
 };
 
-export function MainNavbar({ authLabel = 'Login', authHref = '/login' }: MainNavbarProps) {
+export function MainNavbar({ authLabel = 'Login', authHref = '/login', showNavLinks = true }: MainNavbarProps) {
   const [open, setOpen] = useState(false);
   const isLogout = authLabel === 'Logout';
 
@@ -23,13 +24,15 @@ export function MainNavbar({ authLabel = 'Login', authHref = '/login' }: MainNav
       <nav className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8" aria-label="Primary navigation">
         <div className="flex items-center gap-8">
           <BrandLogo />
-          <div className="hidden items-center gap-6 text-xs font-bold text-white sm:flex">
-            {navItems.map((item) => (
-              <Link className="text-white transition hover:text-cyan" href={item.href} key={item.href}>
-                {item.label}
-              </Link>
-            ))}
-          </div>
+          {showNavLinks && (
+            <div className="hidden items-center gap-6 text-xs font-bold text-white sm:flex">
+              {navItems.map((item) => (
+                <Link className="text-white transition hover:text-cyan" href={item.href} key={item.href}>
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
 
         {isLogout ? (

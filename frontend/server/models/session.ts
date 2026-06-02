@@ -20,6 +20,8 @@ const memberScoreSchema = new Schema(
 
 const submissionSchema = new Schema(
   {
+    evaluatorId: { type: String, required: true },
+    evaluatorName: { type: String, required: true },
     ratings: { type: Schema.Types.Mixed, required: true },
     scores: { type: [memberScoreSchema], required: true },
     submittedAt: { type: Date, required: true }

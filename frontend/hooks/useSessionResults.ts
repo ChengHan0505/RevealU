@@ -9,6 +9,7 @@ import type { FeedbackSession, SessionResult } from '../types/session';
 export function useSessionResults(sessionId: string) {
   const [session, setSession] = useState<FeedbackSession | null>(null);
   const [result, setResult] = useState<SessionResult | null>(null);
+  const [isShareable, setIsShareable] = useState(false);
 
   useEffect(() => {
     async function loadResult() {
@@ -16,6 +17,7 @@ export function useSessionResults(sessionId: string) {
       const storedResult = getResult(sessionId);
       if (storedSession) {
         setSession(storedSession);
+        setIsShareable(false);
       }
       if (storedResult) {
         setResult(storedResult);
@@ -25,6 +27,7 @@ export function useSessionResults(sessionId: string) {
         const sessionResponse = await getJson<{ session: FeedbackSession }>(`/api/sessions/${sessionId}`);
         saveSession(sessionResponse.session);
         setSession(sessionResponse.session);
+        setIsShareable(true);
 
         const resultResponse = await getJson<{ result: SessionResult }>(`/api/sessions/${sessionId}/result`);
         saveResult(resultResponse.result);
@@ -48,5 +51,5 @@ export function useSessionResults(sessionId: string) {
     return aggregateByScores(result.scores, result.submissionCount ?? 0, session.members.length);
   }, [result, session]);
 
-  return { aggregates, result, session, sortedScores };
+  return { aggregates, isShareable, result, session, sortedScores };
 }

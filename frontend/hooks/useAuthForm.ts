@@ -1,6 +1,6 @@
 'use client';
 
-import { FormEvent, useMemo, useState } from 'react';
+import { FormEvent, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { postJson } from '../utils/api';
 
@@ -26,7 +26,7 @@ export function useAuthForm(initialMode: AuthMode = 'login') {
   const [status, setStatus] = useState('');
 
   const isLogin = mode === 'login';
-  const endpoint = useMemo(() => `/api/auth/${isLogin ? 'login' : 'register'}`, [isLogin]);
+  const endpoint = `/api/auth/${isLogin ? 'login' : 'register'}`;
 
   function updateField(field: keyof AuthFormState, value: string) {
     setForm((current) => ({ ...current, [field]: value }));

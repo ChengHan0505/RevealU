@@ -17,7 +17,7 @@ export default function ResultsClient({ sessionId }: ResultsClientProps) {
   const router = useRouter();
   const [copied, setCopied] = useState(false);
   const [showLink, setShowLink] = useState(false);
-  const { aggregates, result, session, sortedScores } = useSessionResults(sessionId);
+  const { aggregates, isShareable, result, session, sortedScores } = useSessionResults(sessionId);
 
   if (!session || !result) {
     return (
@@ -42,7 +42,7 @@ export default function ResultsClient({ sessionId }: ResultsClientProps) {
   const evaluationUrl = buildSessionUrl(window.location.origin, session);
 
   async function copyEvaluationLink() {
-    if (!session) {
+    if (!session || !isShareable) {
       return;
     }
 
@@ -58,18 +58,25 @@ export default function ResultsClient({ sessionId }: ResultsClientProps) {
         <Confetti />
         <header className="relative z-10 mb-9">
           <h1 className="text-5xl font-black tracking-normal text-violet">Session Complete!</h1>
+          <p className="mt-2 text-lg font-black text-ink">{session.name}</p>
           <div className="mt-4 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
             <p className="max-w-xl text-sm font-semibold leading-6 text-ink/68">
               The results are in. Let&apos;s see how the team performed in this sprint&apos;s feedback gauntlet.
             </p>
             <div className="w-full max-w-md">
               <button
-                className="h-11 w-full rounded-md border border-cyan/30 bg-white px-5 text-sm font-black text-cyan shadow-sm transition hover:bg-cyan hover:text-white"
+                className="h-11 w-full rounded-md border border-cyan/30 bg-white px-5 text-sm font-black text-cyan shadow-sm transition hover:bg-cyan hover:text-white disabled:cursor-not-allowed disabled:opacity-45"
+                disabled={!isShareable}
                 onClick={copyEvaluationLink}
                 type="button"
               >
                 {copied ? 'Copied' : 'Copy Evaluation Link'}
               </button>
+              {!isShareable && (
+                <p className="mt-2 text-xs font-bold text-violet">
+                  This session is not synced to MongoDB. Create a fresh session link before sharing.
+                </p>
+              )}
               {showLink && (
                 <a
                   aria-label="Open peer evaluation link"

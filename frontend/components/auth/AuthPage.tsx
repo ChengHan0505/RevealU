@@ -53,7 +53,7 @@ function LeftBanner() {
 export default function AuthPage({ mode }: AuthPageProps) {
   return (
     <div className="min-h-screen bg-app text-ink">
-      <MainNavbar authHref={mode === 'login' ? '/register' : '/login'} authLabel={mode === 'login' ? 'Register' : 'Login'} />
+      <MainNavbar authHref={mode === 'login' ? '/register' : '/login'} authLabel={mode === 'login' ? 'Register' : 'Login'} showNavLinks={false} />
       <main className="auth-stage relative min-h-[calc(100vh-3.5rem)] overflow-hidden px-5 pb-16 pt-16 sm:px-8 lg:px-10">
         <div className="planet absolute bottom-24 right-[6%] hidden size-40 rounded-full shadow-[0_28px_70px_rgba(26,83,88,0.22)] md:block" />
         <div className="mx-auto grid min-h-[calc(100vh-8rem)] max-w-5xl items-center gap-8 lg:grid-cols-[1.02fr_0.95fr]">

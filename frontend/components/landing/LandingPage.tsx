@@ -19,7 +19,7 @@ const steps = [
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-app text-ink">
-      <MainNavbar />
+      <MainNavbar showNavLinks={false} />
       <main>
         <section className="auth-stage px-6 py-16 sm:px-10 lg:px-12">
           <div className="mx-auto grid min-h-[26rem] max-w-6xl items-center gap-12 md:grid-cols-[1fr_0.9fr]">

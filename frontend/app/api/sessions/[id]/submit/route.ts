@@ -11,14 +11,28 @@ export async function POST(request: Request, { params }: RouteContext) {
   const payload = await request.json();
 
   await connectDatabase();
-  const session = await submitEvaluation(id, payload);
+  const submission = await submitEvaluation(id, payload);
 
-  if (!session) {
+  if (submission.status === 'not-found') {
     return NextResponse.json({ message: 'Session not found.' }, { status: 404 });
+  }
+
+  if (submission.status === 'invalid-evaluator') {
+    return NextResponse.json({ message: 'Choose a valid team member before submitting.' }, { status: 400 });
+  }
+
+  if (submission.status === 'duplicate') {
+    return NextResponse.json(
+      {
+        message: 'This team member has already submitted an evaluation.',
+        result: buildResult(submission.session)
+      },
+      { status: 409 }
+    );
   }
 
   return NextResponse.json({
     message: 'Evaluation submitted.',
-    result: buildResult(session)
+    result: buildResult(submission.session)
   });
 }

@@ -20,6 +20,8 @@ const memberScoreSchema = new mongoose.Schema(
 
 const submissionSchema = new mongoose.Schema(
   {
+    evaluatorId: { type: String, required: true },
+    evaluatorName: { type: String, required: true },
     ratings: { type: mongoose.Schema.Types.Mixed, required: true },
     scores: { type: [memberScoreSchema], required: true },
     submittedAt: { type: Date, required: true }

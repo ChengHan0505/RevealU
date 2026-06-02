@@ -31,6 +31,8 @@ export type MemberScore = {
 
 export type SessionResult = {
   sessionId: string;
+  evaluatorId?: string;
+  evaluatorName?: string;
   scores: MemberScore[];
   ratings: RatingsByMember;
   submittedAt: string;

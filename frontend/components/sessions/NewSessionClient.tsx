@@ -16,7 +16,8 @@ export default function NewSessionClient() {
     name,
     sessionUrl,
     setMemberName,
-    setName
+    setName,
+    status
   } = useSessionBuilder();
 
   const canCreate = name.trim().length > 0 && members.length > 0;
@@ -118,6 +119,7 @@ export default function NewSessionClient() {
                 >
                   Generate Session Link
                 </button>
+                {status && <p className="mt-3 text-center text-xs font-bold text-violet">{status}</p>}
                 <button
                   className="mt-4 h-12 w-full rounded-md border border-cyan/30 bg-white text-sm font-black text-cyan transition hover:bg-cyan hover:text-white disabled:cursor-not-allowed disabled:opacity-45"
                   disabled={!sessionUrl}

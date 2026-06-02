@@ -8,6 +8,8 @@ type SessionDocument = {
   createdAt: Date;
   updatedAt: Date;
   submissions?: {
+    evaluatorId: string;
+    evaluatorName: string;
     ratings: Record<string, Record<string, number>>;
     scores: { memberId: string; name: string; total: number; max: number }[];
     submittedAt: Date;
@@ -57,17 +59,36 @@ export function buildResult(session: SessionDocument) {
     sessionId: session.id,
     scores,
     ratings: latest?.ratings ?? {},
+    evaluatorId: latest?.evaluatorId,
+    evaluatorName: latest?.evaluatorName,
     submittedAt: latest?.submittedAt?.toISOString() ?? session.updatedAt.toISOString(),
     submissionCount: submissions.length
   };
 }
 
 export async function createSession(sessionName: string, teamMembers: { id: string; name: string }[]) {
-  const id = `ninja-${Date.now().toString(36)}`;
+  const id = `ninja-${crypto.randomUUID()}`;
+  const seenNames = new Set<string>();
+  const members = teamMembers.reduce<{ id: string; name: string }[]>((acc, member) => {
+    const name = typeof member.name === 'string' ? member.name.trim() : '';
+    const key = name.toLowerCase();
+
+    if (!name || seenNames.has(key)) {
+      return acc;
+    }
+
+    seenNames.add(key);
+    return [...acc, { id: `member-${crypto.randomUUID()}`, name }];
+  }, []);
+
+  if (members.length === 0) {
+    throw new Error('At least one valid team member is required.');
+  }
+
   return SessionModel.create({
     id,
-    name: sessionName,
-    members: teamMembers,
+    name: sessionName.trim(),
+    members,
     evaluationPath: `/sessions/${id}/evaluate`
   });
 }
@@ -76,25 +97,61 @@ export async function findSession(id: string) {
   return SessionModel.findOne({ id }).lean<SessionDocument>();
 }
 
+export async function listSessions() {
+  return SessionModel.find().sort({ createdAt: -1 }).limit(20).lean<SessionDocument[]>();
+}
+
 export async function submitEvaluation(
   id: string,
   payload: {
+    evaluatorId: string;
     ratings: Record<string, Record<string, number>>;
     scores: { memberId: string; name: string; total: number; max: number }[];
     submittedAt?: string;
   }
 ) {
-  return SessionModel.findOneAndUpdate(
-    { id },
+  const session = await findSession(id);
+
+  if (!session) {
+    return { status: 'not-found' as const, session: null };
+  }
+
+  const evaluator = session.members.find((member) => member.id === payload.evaluatorId);
+
+  if (!evaluator) {
+    return { status: 'invalid-evaluator' as const, session };
+  }
+
+  const scoreByMemberId = new Map(payload.scores.map((score) => [score.memberId, score]));
+  const sanitizedScores = session.members.map((member) => {
+    const score = scoreByMemberId.get(member.id);
+    return {
+      memberId: member.id,
+      name: member.name,
+      total: Number(score?.total ?? 0),
+      max: Number(score?.max ?? 24)
+    };
+  });
+
+  const updated = await SessionModel.findOneAndUpdate(
+    { id, 'submissions.evaluatorId': { $ne: evaluator.id } },
     {
       $push: {
         submissions: {
+          evaluatorId: evaluator.id,
+          evaluatorName: evaluator.name,
           ratings: payload.ratings,
-          scores: payload.scores,
+          scores: sanitizedScores,
           submittedAt: payload.submittedAt ? new Date(payload.submittedAt) : new Date()
         }
       }
     },
     { new: true }
   ).lean<SessionDocument>();
+
+  if (!updated) {
+    return { status: 'duplicate' as const, session };
+  }
+
+  return { status: 'submitted' as const, session: updated };
 }

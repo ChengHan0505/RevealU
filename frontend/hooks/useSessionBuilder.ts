@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { createSession, saveSession } from '../utils/session-store';
+import { saveSession } from '../utils/session-store';
 import { buildSessionUrl, createMemberId, createSessionPayload, hasMember } from '../utils/session-payload';
 import { postJson } from '../utils/api';
 import type { FeedbackSession, TeamMember } from '../types/session';
@@ -15,6 +15,7 @@ export function useSessionBuilder() {
   const [session, setSession] = useState<FeedbackSession | null>(null);
   const [sessionUrl, setSessionUrl] = useState('');
   const [copied, setCopied] = useState(false);
+  const [status, setStatus] = useState('');
 
   const payload = useMemo(
     () => createSessionPayload({ name, members }),
@@ -32,31 +33,33 @@ export function useSessionBuilder() {
     setSession(null);
     setSessionUrl('');
     setCopied(false);
+    setStatus('');
   }
 
   async function generateSessionLink() {
     if (!payload.sessionName || payload.teamMembers.length === 0) {
+      setStatus('Add a session name and at least one teammate.');
       return null;
     }
 
-    let nextSession: FeedbackSession;
-
     try {
       const response = await postJson('/api/sessions/create', payload) as { session: FeedbackSession };
-      nextSession = response.session;
+      const nextSession = response.session;
       saveSession(nextSession);
+
+      setSession(nextSession);
+      setSessionUrl(buildSessionUrl(window.location.origin, nextSession));
+      setCopied(false);
+      setStatus('');
+
+      return nextSession;
     } catch {
-      nextSession = createSession({
-        name: payload.sessionName,
-        members: payload.teamMembers
-      });
+      setSession(null);
+      setSessionUrl('');
+      setCopied(false);
+      setStatus('Session link could not be created. Check MongoDB/API connection and try again.');
+      return null;
     }
-
-    setSession(nextSession);
-    setSessionUrl(buildSessionUrl(window.location.origin, nextSession));
-    setCopied(false);
-
-    return nextSession;
   }
 
   async function copyLink() {
@@ -86,6 +89,7 @@ export function useSessionBuilder() {
     name,
     sessionUrl,
     setMemberName,
-    setName
+    setName,
+    status
   };
 }

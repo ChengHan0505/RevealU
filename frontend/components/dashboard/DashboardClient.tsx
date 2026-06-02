@@ -4,7 +4,8 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { AppShell } from '../layout/AppShell';
 import { SurfaceCard } from '../ui/SurfaceCard';
-import { getRecentSessions } from '../../utils/session-store';
+import { getRecentSessions, saveSession } from '../../utils/session-store';
+import { getJson } from '../../utils/api';
 import type { FeedbackSession } from '../../types/session';
 
 export default function DashboardClient() {
@@ -12,6 +13,18 @@ export default function DashboardClient() {
 
   useEffect(() => {
     setSessions(getRecentSessions());
+
+    async function loadSessions() {
+      try {
+        const response = await getJson<{ sessions: FeedbackSession[] }>('/api/sessions');
+        response.sessions.forEach(saveSession);
+        setSessions(response.sessions);
+      } catch {
+        return;
+      }
+    }
+
+    loadSessions();
   }, []);
 
   return (

@@ -11,7 +11,7 @@ type EvaluationClientProps = {
 const ratingScale = [1, 2, 3, 4];
 
 export default function EvaluationClient({ sessionId }: EvaluationClientProps) {
-  const { ratings, router, session, setRating, submitEvaluation, totals } = useEvaluationSession(sessionId);
+  const { canSubmit, evaluatorId, ratings, router, session, setEvaluatorId, setRating, status, submitEvaluation, totals } = useEvaluationSession(sessionId);
 
   if (!session) {
     return (
@@ -37,13 +37,32 @@ export default function EvaluationClient({ sessionId }: EvaluationClientProps) {
             <h1 className="text-sm font-semibold">Peer Evaluation</h1>
             <p className="text-sm text-ink/80">Rate your team members based on their contributions.</p>
           </div>
-          <button
-            className="rounded-sm bg-gradient-to-r from-violet to-cyan px-7 py-3 text-xs font-black text-white shadow-glow"
-            onClick={submitEvaluation}
-            type="button"
-          >
-            Submit Evaluation
-          </button>
+          <div className="flex flex-wrap items-center justify-end gap-3">
+            <label className="text-xs font-black text-ink/60">
+              Your name
+              <select
+                className="ml-2 h-10 rounded-md border border-ink/12 bg-white px-3 text-xs font-bold text-ink outline-none focus:border-cyan focus:ring-4 focus:ring-cyan/15"
+                onChange={(event) => setEvaluatorId(event.target.value)}
+                value={evaluatorId}
+              >
+                <option value="">Choose member</option>
+                {session.members.map((member) => (
+                  <option key={member.id} value={member.id}>
+                    {member.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <button
+              className="rounded-sm bg-gradient-to-r from-violet to-cyan px-7 py-3 text-xs font-black text-white shadow-glow disabled:cursor-not-allowed disabled:opacity-45"
+              disabled={!canSubmit}
+              onClick={submitEvaluation}
+              type="button"
+            >
+              Submit Evaluation
+            </button>
+            {status && <p className="basis-full text-right text-xs font-bold text-violet">{status}</p>}
+          </div>
         </div>
 
         <section className="overflow-x-auto rounded-b-3xl border border-ink/6 bg-white shadow-soft">

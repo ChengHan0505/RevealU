@@ -19,7 +19,8 @@ function writeCollection<T>(key: string, collection: Record<string, T>) {
 }
 
 export function createSession(draft: SessionDraft): FeedbackSession {
-  const id = `ninja-${Date.now().toString(36)}`;
+  const fallback = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+  const id = `ninja-${globalThis.crypto?.randomUUID?.() ?? fallback}`;
   const session: FeedbackSession = {
     ...draft,
     id,

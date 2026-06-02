@@ -1,8 +1,8 @@
 import type { FeedbackSession, SessionDraft, TeamMember } from '../types/session';
 
 export function createMemberId(name: string) {
-  const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-  return slug || `member-${Date.now()}`;
+  const fallback = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+  return `member-${globalThis.crypto?.randomUUID?.() ?? fallback}`;
 }
 
 export function createSessionPayload(draft: SessionDraft) {
@@ -13,8 +13,22 @@ export function createSessionPayload(draft: SessionDraft) {
 }
 
 export function buildSessionUrl(origin: string, session: FeedbackSession) {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '');
-  return `${appUrl || origin}${session.evaluationPath}`;
+  const appUrl = resolveAppBaseUrl(origin);
+  return `${appUrl}${session.evaluationPath}`;
+}
+
+function resolveAppBaseUrl(origin: string) {
+  const configuredUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '');
+
+  if (!configuredUrl || configuredUrl.includes('your-vercel-app')) {
+    return origin;
+  }
+
+  if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
+    return origin;
+  }
+
+  return configuredUrl;
 }
 
 export function hasMember(members: TeamMember[], name: string) {
